@@ -9,6 +9,7 @@ import json
 import shutil
 import traceback
 
+
 def perform_nli(premise, hypothesis):
     with torch.inference_mode():
         out = nli_model(**nli_tokenizer(premise, hypothesis, return_tensors='pt'))
@@ -62,10 +63,14 @@ def score(premise: str, hypothesis: str, test: Dict[str, np.array], top_k=10, pe
         "final": f_score / divisor
     }
 
+
+app = Flask(__name__)
+
 with open("data/embeds2.json") as f:
     hypothesis_files = json.load(f)
 embeddings = {text: torch.load(file).numpy() for text, file in hypothesis_files.items()}
 
+shutil.rmtree("/home/broccoliman/.cache/huggingface")
 nli_tokenizer = AutoTokenizer.from_pretrained('cointegrated/rubert-base-cased-nli-threeway')
 nli_model = AutoModelForSequenceClassification.from_pretrained('cointegrated/rubert-base-cased-nli-threeway')
 shutil.rmtree("/home/broccoliman/.cache/huggingface")
