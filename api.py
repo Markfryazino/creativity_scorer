@@ -8,6 +8,7 @@ import scipy.spatial.distance
 import json
 import shutil
 import traceback
+import wandb
 
 
 def perform_nli(premise, hypothesis):
@@ -66,14 +67,17 @@ def score(premise: str, hypothesis: str, test: Dict[str, np.array], top_k=10, pe
 
 app = Flask(__name__)
 
-with open("data/embeds2.json") as f:
+with open("data/embeds_fin.json") as f:
     hypothesis_files = json.load(f)
-embeddings = {text: torch.load(file).numpy() for text, file in hypothesis_files.items()}
+embeddings = {text[22:]: torch.load(file).numpy() for text, file in hypothesis_files.items()}
 
 try:
     shutil.rmtree("/home/broccoliman/.cache/huggingface")
 except:
     pass
+
+wandb.init(project="broccoliman/creativity_scorer", name="api-run")
+
 nli_tokenizer = AutoTokenizer.from_pretrained('cointegrated/rubert-base-cased-nli-threeway')
 nli_model = AutoModelForSequenceClassification.from_pretrained('cointegrated/rubert-base-cased-nli-threeway')
 shutil.rmtree("/home/broccoliman/.cache/huggingface")
@@ -88,14 +92,21 @@ shutil.rmtree("/home/broccoliman/.cache/huggingface")
 
 print("MODELS READY")
 
+count = 0
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
         params = request.get_json()
-        print(f"Got request {params}")
+        print(f"Got request!")
+        print(params)
         res = score(params["premise"], params["hypothesis"], embeddings)
-        print(f"Result: {res}")
+        print(f"Result:")
+        print(res)
+
+        count += 1
+        wandb.log({"count": count, **params, **res})
+
         return res
     except:
         return {"error": traceback.format_exc()}
