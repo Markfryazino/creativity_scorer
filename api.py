@@ -71,13 +71,12 @@ with open("data/embeds_fin.json") as f:
     hypothesis_files = json.load(f)
 embeddings = {text[22:]: torch.load(file).numpy() for text, file in hypothesis_files.items()}
 
+wandb.init(project="creativity_scorer", name="api-run")
+
 try:
     shutil.rmtree("/home/broccoliman/.cache/huggingface")
 except:
     pass
-
-wandb.init(project="broccoliman/creativity_scorer", name="api-run")
-
 nli_tokenizer = AutoTokenizer.from_pretrained('cointegrated/rubert-base-cased-nli-threeway')
 nli_model = AutoModelForSequenceClassification.from_pretrained('cointegrated/rubert-base-cased-nli-threeway')
 shutil.rmtree("/home/broccoliman/.cache/huggingface")
@@ -96,6 +95,7 @@ count = 0
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    global count
     try:
         params = request.get_json()
         print(f"Got request!")
