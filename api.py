@@ -93,6 +93,15 @@ print("MODELS READY")
 
 count = 0
 
+user_id = 4200000
+
+@app.route('/id', methods=['POST'])
+def get_id():
+    global user_id
+    user_id += 1
+    print(f"User {user_id} has been created!")
+    return user_id
+
 @app.route('/predict', methods=['POST'])
 def predict():
     global count
@@ -111,6 +120,17 @@ def predict():
     except:
         return {"error": traceback.format_exc()}
 
+@app.route('/save', methods=['POST'])
+def save():
+    try:
+        params = request.get_json()
+        print(f"Saving parameters...")
+        print(params)
+        wandb.log(params})
+
+        return {"success": "success"}
+    except:
+        return {"error": traceback.format_exc()}
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
