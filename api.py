@@ -70,7 +70,10 @@ with open("data/embeds2.json") as f:
     hypothesis_files = json.load(f)
 embeddings = {text: torch.load(file).numpy() for text, file in hypothesis_files.items()}
 
-shutil.rmtree("/home/broccoliman/.cache/huggingface")
+try:
+    shutil.rmtree("/home/broccoliman/.cache/huggingface")
+except:
+    pass
 nli_tokenizer = AutoTokenizer.from_pretrained('cointegrated/rubert-base-cased-nli-threeway')
 nli_model = AutoModelForSequenceClassification.from_pretrained('cointegrated/rubert-base-cased-nli-threeway')
 shutil.rmtree("/home/broccoliman/.cache/huggingface")
